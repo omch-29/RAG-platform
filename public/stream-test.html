@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>RAG Streaming Test</title>
+<style>
+  body { font-family: monospace; max-width: 700px; margin: 40px auto; padding: 0 20px; }
+  textarea, input { width: 100%; box-sizing: border-box; margin-bottom: 10px; padding: 8px; font-family: monospace; }
+  button { padding: 10px 20px; cursor: pointer; }
+  #answer { white-space: pre-wrap; border: 1px solid #ccc; padding: 15px; min-height: 100px; margin-top: 15px; background: #fafafa; }
+  #sources { margin-top: 15px; font-size: 0.85em; color: #555; }
+  #status { color: #888; font-size: 0.85em; margin-top: 8px; }
+</style>
+</head>
+<body>
+  <h2>RAG Streaming Test</h2>
+  <p>Paste your JWT token (from signup/login response) and a question, then watch tokens stream in live.</p>
+
+  <label>Token:</label>
+  <textarea id="token" rows="3" placeholder="eyJhbGciOi..."></textarea>
+
+  <label>Question:</label>
+  <input id="question" type="text" placeholder="What does X-Signature header do?">
+
+  <button onclick="ask()">Ask (Stream)</button>
+
+  <div id="status"></div>
+  <div id="answer"></div>
+  <div id="sources"></div>
+
+  <script>
+    function ask() {
+      const token = document.getElementById('token').value.trim();
+      const question = document.getElementById('question').value.trim();
+      const answerEl = document.getElementById('answer');
+      const sourcesEl = document.getElementById('sources');
+      const statusEl = document.getElementById('status');
+
+      if (!token || !question) {
+        alert('Token and question are both required');
+        return;
+      }
+
+      answerEl.textContent = '';
+      sourcesEl.textContent = '';
+      statusEl.textContent = 'Connecting...';
+
+      const url = `/api/query/stream?question=${encodeURIComponent(question)}&token=${encodeURIComponent(token)}`;
+      const es = new EventSource(url);
+
+      es.addEventListener('sources', (e) => {
+        const data = JSON.parse(e.data);
+        statusEl.textContent = 'Retrieved ' + data.sources.length + ' chunk(s) — generating answer...';
+        sourcesEl.textContent = 'Sources: ' + JSON.stringify(data.sources, null, 2);
+      });
+
+      es.addEventListener('token', (e) => {
+        const data = JSON.parse(e.data);
+        answerEl.textContent += data.text;
+      });
+
+      es.addEventListener('done', (e) => {
+        const data = JSON.parse(e.data);
+        statusEl.textContent = data.cached ? 'Done (served from cache)' : 'Done (live generation)';
+        es.close();
+      });
+
+      es.addEventListener('error', (e) => {
+        statusEl.textContent = 'Error or connection closed.';
+        es.close();
+      });
+    }
+  </script>
+</body>
+</html>

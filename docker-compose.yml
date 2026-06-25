@@ -1,0 +1,92 @@
+
+
+version: '3.8'
+
+services:
+  mongo:
+    image: mongo:7
+    container_name: rag-mongo
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --quiet --eval 'db.adminCommand(\"ping\")' || mongo --quiet --eval 'db.adminCommand(\"ping\")' || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 40
+      start_period: 180s
+
+  chroma:
+    image: chromadb/chroma:latest
+    container_name: rag-chroma
+    ports:
+      - '8000:8000'
+    volumes:
+      - chroma-data:/chroma/chroma
+
+  redis:
+    image: redis:7-alpine
+    container_name: rag-redis
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  opensearch:
+    image: opensearchproject/opensearch:2.15.0
+    container_name: rag-opensearch
+    environment:
+      - discovery.type=single-node
+      # JVM heap constrained to 512MB so this stays usable on a laptop —
+      # production deployments would size this based on data volume, not
+      # this dev default
+      - OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m
+      # security plugin disabled for local dev simplicity only — a real
+      # deployment must re-enable TLS + auth, this is a known dev-only
+      # shortcut, not a production setting
+      - DISABLE_SECURITY_PLUGIN=true
+    ports:
+      - '9200:9200'
+    volumes:
+      - opensearch-data:/usr/share/opensearch/data
+    healthcheck:
+      test: ["CMD", "curl", "-s", "-f", "http://localhost:9200/_cluster/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 30s
+
+  app:
+    build: .
+    container_name: rag-app
+    ports:
+      - '4000:4000'
+    env_file:
+      - .env
+    environment:
+      # override host-based URIs to use Docker service names instead of localhost
+      - MONGO_URI=mongodb://mongo:27017/rag_platform
+      - CHROMA_URL=http://chroma:8000
+      - REDIS_URL=redis://redis:6379
+      - OPENSEARCH_URL=http://opensearch:9200
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      opensearch:
+        condition: service_healthy
+      chroma:
+        condition: service_started
+
+volumes:
+  mongo-data:
+  chroma-data:
+  redis-data:
+  opensearch-data:
