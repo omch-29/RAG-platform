@@ -1,11 +1,9 @@
 const Usage = require('../models/Usage');
 
 /**
- * Cost is an ESTIMATE based on configurable per-1K-token prices, not a
- * real billing figure pulled from Groq's API — Groq doesn't return cost
- * directly, only token counts. Prices live in env vars specifically so
- * they can be corrected without a code change when actual pricing is
- * confirmed; treat the dollar figure as directional, not invoiced truth.
+ * Cost is an ESTIMATE based on configurable per-1K-token prices,
+ 
+ *
  */
 const PROMPT_PRICE_PER_1K = parseFloat(process.env.COST_PER_1K_PROMPT_TOKENS) || 0.05;
 const COMPLETION_PRICE_PER_1K = parseFloat(process.env.COST_PER_1K_COMPLETION_TOKENS) || 0.08;
@@ -48,8 +46,7 @@ async function recordUsage({ tenantId, usage }) {
 }
 
 /**
- * Returns the tenant's usage history (one row per day) plus a summed
- * total across all days — what the /api/usage endpoint serves.
+ 
  */
 async function getTenantUsage(tenantId) {
   const days = await Usage.find({ tenant: tenantId }).sort({ date: -1 }).lean();

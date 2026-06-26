@@ -1,20 +1,7 @@
 const { ChromaClient } = require('chromadb');
 
 /**
- * Multi-tenancy design decision: ONE shared Chroma collection, with every
- * chunk tagged with a `tenantId` metadata field, rather than one Chroma
- * collection per tenant.
- *
- * Why: a collection-per-tenant approach doesn't scale operationally —
- * thousands of tenants would mean thousands of collections to manage,
- * back up, and route between. A single collection with a mandatory
- * metadata filter on every read/write is the same pattern production
- * multi-tenant systems use at the database-row level (a `tenant_id`
- * column + a WHERE clause on every query). The isolation guarantee here
- * is identical in strength — it just lives in the `where` filter instead
- * of in physical separation. The critical rule: every single query() and
- * add() call below the tenant boundary MUST include tenantId. There is
- * deliberately no codepath that queries the collection without one.
+
  */
 
 let clientInstance = null;
@@ -69,9 +56,7 @@ async function addChunks({ tenantId, documentId, chunkTexts, embeddings }) {
 
 /**
  * Retrieves the top-K most relevant chunks for a tenant given a query
- * embedding. The `where: { tenantId }` clause is the tenant-isolation
- * enforcement point at the vector-store layer — without it, a query
- * could retrieve another tenant's confidential documents.
+ 
  */
 async function queryChunks({ tenantId, queryEmbedding, topK = 4 }) {
   if (!tenantId) {
