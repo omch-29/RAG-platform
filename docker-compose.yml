@@ -1,5 +1,3 @@
-
-
 version: '3.8'
 
 services:
@@ -85,8 +83,23 @@ services:
       chroma:
         condition: service_started
 
+  caddy:
+    image: caddy:2-alpine
+    container_name: rag-caddy
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - app
+
 volumes:
   mongo-data:
   chroma-data:
   redis-data:
   opensearch-data:
+  caddy-data:
+  caddy-config:
