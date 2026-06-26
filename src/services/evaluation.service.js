@@ -12,7 +12,7 @@ function precisionAtK(retrievedIds, relevantIds) {
 }
 
 function recallAtK(retrievedIds, relevantIds) {
-  if (relevantIds.length === 0) return 1; // nothing relevant exists — vacuously satisfied
+  if (relevantIds.length === 0) return 1; // nothing exists
   const retrievedSet = new Set(retrievedIds);
   const hits = relevantIds.filter((id) => retrievedSet.has(id)).length;
   return hits / relevantIds.length;
