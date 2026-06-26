@@ -1,17 +1,6 @@
 const { getOpenSearchClient } = require('../config/opensearch');
 
-/**
- * Mirrors the multi-tenancy pattern used in vectorStore.service.js: ONE
- * shared OpenSearch index, every chunk document tagged with `tenantId`,
- * filtered on every search via a `term` query — never a separate index
- * per tenant. Same reasoning as the Chroma collection: operational
- * simplicity at scale, isolation enforced by a mandatory filter instead
- * of physical separation.
- *
- * Chunk document IDs are kept identical to the ones used in Chroma
- * (`${documentId}-chunk-${i}`) so that fusion (combining vector + BM25
- * results) can match chunks across both retrieval systems by ID.
- */
+
 
 const INDEX_NAME = process.env.OPENSEARCH_INDEX || 'rag_chunks';
 
@@ -65,11 +54,7 @@ async function indexChunks({ tenantId, documentId, chunkTexts }) {
   }
 }
 
-/**
- * BM25 keyword search scoped to a tenant. Returns chunks ranked by
- * OpenSearch's relevance score (real BM25, via the `match` query against
- * the `text` field's default similarity).
- */
+
 async function searchChunks({ tenantId, queryText, size = 10 }) {
   if (!tenantId) {
     throw new Error('searchChunks: tenantId is required for isolation — refusing to search without it');
