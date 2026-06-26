@@ -39,7 +39,7 @@ async function ingestDocument(req, res, next) {
       return res.status(400).json({ error: 'No chunks produced from input text' });
     }
 
-    const embeddings = await embed(chunks); // batched: array in, array of vectors out
+    const embeddings = await embed(chunks); 
 
     await addChunks({
       tenantId: req.tenantId,

@@ -16,17 +16,8 @@ async function queryCacheKey(tenantId, question) {
 }
 
 /**
- * GET /api/query/stream?question=...&token=...
- *
- * Same retrieval pipeline as the non-streaming /api/query (cache check,
- * hybrid vector+BM25 retrieval, RRF fusion), but the generation step
- * streams tokens to the client via Server-Sent Events as they arrive
- * from Groq, instead of waiting for the full answer.
- *
- * On a cache hit, there's no token-by-token generation to stream — the
- * full cached answer is sent as a single SSE event immediately. This is
- * a deliberate simplification: re-streaming a cached string token-by-token
- * would only add artificial latency with no real benefit.
+ * GET /api/query/stream?question
+ 
  */
 async function queryStream(req, res, next) {
   const { question } = req.query;
