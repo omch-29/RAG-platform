@@ -2,15 +2,6 @@
  * Standard information-retrieval metrics, computed against a ranked list
  * of retrieved document/chunk IDs and a ground-truth set of relevant IDs.
  *
- * precision@k: of the k chunks we retrieved, what fraction were actually
- * relevant? Measures how much noise/irrelevant content gets handed to
- * the LLM — high noise increases hallucination risk and wastes tokens.
- *
- * recall@k: of all the relevant chunks that exist, what fraction did we
- * successfully retrieve in our top k? Measures whether the system is
- * missing genuinely relevant content — a recall miss means the LLM
- * never even saw the right source, so it cannot possibly answer
- * correctly regardless of how good the generation step is.
  */
 
 function precisionAtK(retrievedIds, relevantIds) {
