@@ -6,15 +6,6 @@ const mongoose = require('mongoose');
 //     throw new Error('MONGO_URI is not set in environment variables');
 //   }
 
-//   mongoose.connection.on('connected', () => {
-//     console.log('[mongo] connected');
-//   });
-
-//   mongoose.connection.on('error', (err) => {
-//     console.error('[mongo] connection error:', err.message);
-//   });
-
-//   await mongoose.connect(uri);
 // }
 
 async function connectDB({ retries = 5, delayMs = 3000 } = {}) {
