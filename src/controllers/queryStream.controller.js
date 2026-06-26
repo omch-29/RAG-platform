@@ -3,15 +3,16 @@ const { queryChunks } = require('../services/vectorStore.service');
 const { searchChunks } = require('../services/keywordSearch.service');
 const { fuseResults } = require('../services/fusion.service');
 const { streamAnswer } = require('../services/llm.service');
-const { hashKey, getCached, setCached } = require('../services/cache.service');
+const { hashKey, getCached, setCached, getTenantCacheVersion } = require('../services/cache.service');
 const { recordUsage } = require('../services/usage.service');
 
 const QUERY_CACHE_TTL_SECONDS = parseInt(process.env.QUERY_CACHE_TTL_SECONDS, 10) || 300;
 const RRF_K = parseInt(process.env.RRF_K, 10) || 60;
 const RRF_CANDIDATE_POOL = parseInt(process.env.RRF_CANDIDATE_POOL, 10) || 10;
 
-function queryCacheKey(tenantId, question) {
-  return `querycache:${tenantId}:${hashKey(question.trim().toLowerCase())}`;
+async function queryCacheKey(tenantId, question) {
+  const version = await getTenantCacheVersion(tenantId);
+  return `querycache:${tenantId}:v${version}:${hashKey(question.trim().toLowerCase())}`;
 }
 
 /**
@@ -48,7 +49,7 @@ async function queryStream(req, res, next) {
   };
 
   try {
-    const cacheKey = queryCacheKey(req.tenantId, question);
+    const cacheKey = await queryCacheKey(req.tenantId, question);
     const cachedResult = await getCached(cacheKey);
 
     if (cachedResult) {
