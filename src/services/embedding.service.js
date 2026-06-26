@@ -16,8 +16,7 @@ async function getEmbedder() {
 }
 
 function embeddingCacheKey(text) {
-  // model name is part of the key — if you ever swap embedding models,
-  // old cached vectors (different dimensionality/space) must not be reused
+  // model name is part of the key 
   const modelName = process.env.EMBEDDING_MODEL || 'Xenova/all-MiniLM-L6-v2';
   return `embcache:${modelName}:${hashKey(text)}`;
 }
@@ -34,7 +33,7 @@ async function embedOne(text) {
   const output = await embedder(text, { pooling: 'mean', normalize: true });
   const vector = Array.from(output.data);
 
-  // embeddings are deterministic for a given text+model, so no TTL needed
+  // embeddings 
   await setCached(cacheKey, vector, null);
 
   return vector;
