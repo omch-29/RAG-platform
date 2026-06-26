@@ -89,4 +89,41 @@ async function login(req, res, next) {
   }
 }
 
-module.exports = { signupTenant, login };
+module.exports = { signupTenant, login, inviteMember };
+
+/**
+ * Lets an existing admin create an additional user under their OWN
+ * tenant — this is how a teammate joins the same workspace, as opposed
+ * to signupTenant which always creates a brand new, isolated tenant.
+ * Without this endpoint there was no way for a second person to ever
+ * join an existing company's workspace.
+ */
+async function inviteMember(req, res, next) {
+  try {
+    const { email, password, role } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ error: 'email and password are required' });
+    }
+
+    const existing = await User.findOne({ tenant: req.tenantId, email });
+    if (existing) {
+      return res.status(409).json({ error: 'A user with this email already exists in this workspace' });
+    }
+
+    const passwordHash = await bcrypt.hash(password, 10);
+    const user = await User.create({
+      tenant: req.tenantId,
+      email,
+      passwordHash,
+      role: role === 'admin' ? 'admin' : 'member',
+    });
+
+    res.status(201).json({
+      user: { id: user._id, email: user.email, role: user.role },
+      message: 'Teammate added. They can now log in using your workspace slug, this email, and this password.',
+    });
+  } catch (err) {
+    next(err);
+  }
+}
