@@ -9,7 +9,7 @@ const errorHandler = require('./middleware/errorHandler');
 const app = express();
 
 app.use(cors());
-app.use(express.json({ limit: '5mb' })); // raised limit since ingest bodies carry full document text
+app.use(express.json({ limit: '5mb' })); 
 app.use(express.static('public'));
 
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
