@@ -2,17 +2,7 @@ const { getRedisClient } = require('../config/redis');
 
 /**
  * Fixed-window rate limiting: count requests in the current 60-second
- * window (keyed by tenantId + the current minute), reject once the
- * configured limit is exceeded.
  *
- * Why fixed-window instead of a sliding window or token bucket: it's the
- * simplest correct implementation — two Redis ops (INCR + EXPIRE) per
- * request, no extra data structures. The known trade-off is a burst at
- * window boundaries (a tenant could send `limit` requests at 0:59 and
- * another `limit` at 1:00, i.e. 2x limit in under 2 seconds) — acceptable
- * here since the goal is protecting the Groq quota/cost from abuse, not
- * perfectly smoothing traffic. A sliding-window or token-bucket
- * algorithm would close that gap at the cost of more Redis round trips.
  */
 
 const LIMIT_PER_MINUTE = parseInt(process.env.RATE_LIMIT_PER_MINUTE, 10) || 20;
