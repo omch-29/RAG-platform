@@ -2,11 +2,6 @@
 const crypto = require('crypto');
 const { getRedisClient } = require('../config/redis');
 
-/**
- * Two distinct cache layers live on top of this generic wrapper:
- *
-
- */
 
 function hashKey(text) {
   return crypto.createHash('sha256').update(text).digest('hex');
