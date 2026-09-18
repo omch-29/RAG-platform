@@ -1,5 +1,5 @@
 
 # certificate for this hostname — no manual cert management needed.
-13-218-152-121.nip.io {
+54-198-115-204.nip.io {
     reverse_proxy app:4000
 }
