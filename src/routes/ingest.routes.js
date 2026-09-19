@@ -19,6 +19,8 @@ const upload = multer({
 router.use(authMiddleware);
 
 router.post('/', requireAdmin, rateLimitMiddleware, ingestDocument);
+router.post('/pdf', requireAdmin, rateLimitMiddleware, upload.single('pdf'), ingestPdf);
+router.post('/url', requireAdmin, rateLimitMiddleware, ingestUrl);
 router.get('/', listDocuments);
 router.delete('/:id', requireAdmin, deleteDocument);
 
