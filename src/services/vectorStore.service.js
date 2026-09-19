@@ -83,4 +83,4 @@ async function queryChunks({ tenantId, queryEmbedding, topK = 4 }) {
   }));
 }
 
-module.exports = { addChunks, queryChunks };
+module.exports = { addChunks, queryChunks, getCollection };
