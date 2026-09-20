@@ -100,8 +100,8 @@ const { addChunks, getCollection } = require('../services/vectorStore.service');
 const { indexChunks } = require('../services/keywordSearch.service');
 const { bumpTenantCacheVersion } = require('../services/cache.service');
 const { getOpenSearchClient } = require('../config/opensearch');
-const { extractTextFromPdf } = require('../services/pdfExtraction.service');
-const { extractTextFromUrl } = require('../services/urlExtraction.service');
+//const { extractTextFromPdf } = require('../services/pdfExtraction.service');
+//const { extractTextFromUrl } = require('../services/urlExtraction.service');
 
 const INDEX_NAME = process.env.OPENSEARCH_INDEX || 'rag_chunks';
 
